@@ -1,4 +1,4 @@
-package model
+package connections
 
 import (
 	"log"
@@ -8,15 +8,14 @@ import (
 	"gorm.io/gorm"
 )
 
-func InitDb(dbUrl string) *gorm.DB {
+func InitDb(dbUrl string) {
 	db, err := gorm.Open(postgres.Open(dbUrl), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: false,
 	})
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalln("could not connect o jare")
 	}
 
 	db.AutoMigrate(&model.Task{})
 
-	return db
 }

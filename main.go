@@ -1,10 +1,14 @@
 package main
 
 import (
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"github.com/rs/cors"
+	"github.com/steelthedev/task-go/connections"
 	task "github.com/steelthedev/task-go/pkg/task/routes"
 	"go.uber.org/zap"
 )
@@ -14,6 +18,11 @@ var (
 )
 
 func main() {
+	err := godotenv.Load("local.env")
+	if err != nil {
+		log.Fatal("Could not load env")
+	}
+	dbUrl := string(os.Getenv("dbUrl"))
 	logger, err := zap.NewProduction()
 	if err != nil {
 		panic(err)
@@ -28,6 +37,7 @@ func main() {
 			"status":  true,
 		})
 	})
+	connections.InitDb(dbUrl)
 	task.RegisterRoutes(router)
 
 	router.Use(func(c *gin.Context) {
@@ -39,7 +49,7 @@ func main() {
 		})
 	})
 
-	if err := router.Run(":8080"); err != nil {
+	if err := router.Run(":3000"); err != nil {
 		logger.Error(err.Error())
 	}
 }

@@ -11,26 +11,28 @@ import (
 )
 
 func CreateTask(ctx *gin.Context, db *gorm.DB) (*model.Task, *utils.AppError) {
-	var task model.Task
 
 	body := &dto.CreateTask{}
 	if err := ctx.BindJSON(&body); err != nil {
 		return nil, &utils.AppError{
 			Message:    "Invalid body request",
 			StatusCode: http.StatusBadRequest,
+			Error:      err.Error(),
 		}
 	}
 
-	task.Title = body.Title
-	task.Status = model.Choice(body.Status)
+	newTask := model.Task{
+		Title:  body.Title,
+		Status: model.StatusChoiceNotStarted,
+	}
 
-	if result := db.Create(&task); result.Error != nil {
+	if result := db.Create(&newTask).Table("task"); result.Error != nil {
 		return nil, &utils.AppError{
 			Message:    "An internal Error occured",
 			StatusCode: http.StatusInternalServerError,
+			Error:      result.Error.Error(),
 		}
 	}
-
-	return &task, nil
+	return &newTask, nil
 
 }

@@ -21,7 +21,9 @@ func (h handler) CreateTask(ctx *gin.Context) {
 	if err != nil {
 		ctx.AbortWithStatusJSON(err.StatusCode, gin.H{
 			"message": err.Message,
+			"error":   err.Error,
 		})
+		return
 	}
 	ctx.IndentedJSON(http.StatusCreated, gin.H{
 		"message": "Task created successfully",
