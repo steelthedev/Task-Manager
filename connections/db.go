@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func InitDb(dbUrl string) {
+func InitDb(dbUrl string) *gorm.DB {
 	db, err := gorm.Open(postgres.Open(dbUrl), &gorm.Config{
 		DisableForeignKeyConstraintWhenMigrating: false,
 	})
@@ -18,4 +18,5 @@ func InitDb(dbUrl string) {
 
 	db.AutoMigrate(&model.Task{})
 
+	return db
 }

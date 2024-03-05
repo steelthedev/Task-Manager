@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -9,7 +10,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 	"github.com/steelthedev/task-go/connections"
-	task "github.com/steelthedev/task-go/pkg/task/routes"
+	"github.com/steelthedev/task-go/pkg/task/controller"
+
 	"go.uber.org/zap"
 )
 
@@ -37,8 +39,8 @@ func main() {
 			"status":  true,
 		})
 	})
-	connections.InitDb(dbUrl)
-	task.RegisterRoutes(router)
+	db := connections.InitDb(dbUrl)
+	controller.RegisterRoutes(router, db)
 
 	router.Use(func(c *gin.Context) {
 		cors.New(cors.Options{
@@ -48,7 +50,7 @@ func main() {
 		}).ServeHTTP(c.Writer, c.Request, func(w http.ResponseWriter, r *http.Request) {
 		})
 	})
-
+	fmt.Printf(db.Statement.Table)
 	if err := router.Run(":3000"); err != nil {
 		logger.Error(err.Error())
 	}
