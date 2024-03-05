@@ -1,38 +1,30 @@
 package services
 
 import (
-	"net/http"
-
-	"github.com/gin-gonic/gin"
 	"github.com/steelthedev/task-go/pkg/task/dto"
 	"github.com/steelthedev/task-go/pkg/task/model"
+	"github.com/steelthedev/task-go/pkg/task/repository"
 	"github.com/steelthedev/task-go/pkg/utils"
-	"gorm.io/gorm"
 )
 
-func CreateTask(ctx *gin.Context, db *gorm.DB) (*model.Task, *utils.AppError) {
+type TaskServices struct {
+	Storage repository.Storage
+}
 
-	body := &dto.CreateTask{}
-	if err := ctx.BindJSON(&body); err != nil {
+func (s *TaskServices) CreateTask(requestBody dto.CreateTask) (*model.Task, *utils.AppError) {
+	task, err := model.NewTask(&requestBody)
+	if err != nil {
 		return nil, &utils.AppError{
-			Message:    "Invalid body request",
-			StatusCode: http.StatusBadRequest,
-			Error:      err.Error(),
+			Message: "Error occured while sending request body to repository",
+			Error:   err.Error(),
 		}
 	}
-
-	newTask := model.Task{
-		Title:  body.Title,
-		Status: model.StatusChoiceNotStarted,
-	}
-
-	if result := db.Create(&newTask).Table("task"); result.Error != nil {
+	task, err = s.Storage.CreateTask(task)
+	if err != nil {
 		return nil, &utils.AppError{
-			Message:    "An internal Error occured",
-			StatusCode: http.StatusInternalServerError,
-			Error:      result.Error.Error(),
+			Message: "Error Occured during saving layer",
+			Error:   err.Error(),
 		}
 	}
-	return &newTask, nil
-
+	return task, nil
 }

@@ -4,8 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/steelthedev/task-go/pkg/task/dto"
 	"github.com/steelthedev/task-go/pkg/task/services"
-	"gorm.io/gorm"
+	"github.com/steelthedev/task-go/pkg/utils"
 )
 
 var (
@@ -13,20 +14,20 @@ var (
 )
 
 type handler struct {
-	db *gorm.DB
+	services.TaskServices
 }
 
 func (h handler) CreateTask(ctx *gin.Context) {
-	_, err := services.CreateTask(ctx, h.db)
-	if err != nil {
-		ctx.AbortWithStatusJSON(err.StatusCode, gin.H{
-			"message": err.Message,
-			"error":   err.Error,
-		})
+
+	body := dto.CreateTask{}
+	if err := ctx.BindJSON(&body); err != nil {
+		utils.ApiErrorFunction(ctx, http.StatusBadRequest, "Bad Request", err.Error())
 		return
 	}
-	ctx.IndentedJSON(http.StatusCreated, gin.H{
-		"message": "Task created successfully",
-	})
-
+	task, err := h.TaskServices.CreateTask(body)
+	if err != nil {
+		utils.ApiErrorFunction(ctx, http.StatusInternalServerError, err.Message, err.Error)
+		return
+	}
+	utils.ApiSuccessIndented(ctx, http.StatusCreated, "Created", &task)
 }
