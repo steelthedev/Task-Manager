@@ -27,3 +27,25 @@ func CreateTaskHelper(requestBody *dto.CreateTask, db *gorm.DB) (*model.Task, er
 	}
 	return newTask, nil
 }
+
+func DeleteTaskHelper(id int, db *gorm.DB) error {
+	task, err := FindTaskByID(id, db)
+	if err != nil {
+		return err
+	}
+	if result := db.Delete(&task); result.Error != nil {
+		return fmt.Errorf("could not delete tasks")
+	}
+
+	return nil
+}
+
+func FindTaskByID(id int, db *gorm.DB) (*model.Task, error) {
+	var task model.Task
+	if result := db.Where("id", id).First(&task); result.Error != nil {
+		return nil, fmt.Errorf("cannot get task from db")
+	}
+
+	return &task, nil
+
+}

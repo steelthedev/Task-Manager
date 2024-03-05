@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/steelthedev/task-go/pkg/task/dto"
@@ -35,5 +36,22 @@ func (h *handler) CreateTask(ctx *gin.Context) {
 	}
 
 	utils.ApiSuccessIndented(ctx, http.StatusOK, "", &task)
+
+}
+
+func (h *handler) DeleteTask(ctx *gin.Context) {
+	id := ctx.Param("id")
+	i, err := strconv.Atoi(id)
+	if err != nil {
+		utils.ApiErrorFunction(ctx, http.StatusInternalServerError, "Errror occured somewhere", "Error occured while converting ID to int")
+		return
+	}
+	err = DeleteTaskHelper(i, h.DB)
+	if err != nil {
+		utils.ApiErrorFunction(ctx, http.StatusInternalServerError, err.Error(), err.Error())
+		return
+	}
+
+	utils.ApiSuccessIndented(ctx, http.StatusOK, "Deleted succesfully", "")
 
 }
