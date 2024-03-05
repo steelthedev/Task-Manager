@@ -40,6 +40,24 @@ func DeleteTaskHelper(id int, db *gorm.DB) error {
 	return nil
 }
 
+func UpdateTaskHelper(id int, requestBody *dto.CreateTask, db *gorm.DB) error {
+	task, err := FindTaskByID(id, db)
+	if err != nil {
+		return err
+	}
+	updatedTask, err := model.NewTask(requestBody)
+	if err != nil {
+		return err
+	}
+	task.Title = updatedTask.Title
+	task.Status = task.Status
+	if result := db.Save(&task); result.Error != nil {
+		return fmt.Errorf("could not update task tasks")
+	}
+
+	return nil
+}
+
 func FindTaskByID(id int, db *gorm.DB) (*model.Task, error) {
 	var task model.Task
 	if result := db.Where("id", id).First(&task); result.Error != nil {
