@@ -28,6 +28,14 @@ func CreateTaskHelper(requestBody *dto.CreateTask, db *gorm.DB) (*model.Task, er
 	return newTask, nil
 }
 
+func GetSingleTaskHelper(id int, db *gorm.DB) (*model.Task, error) {
+	task, err := FindTaskByID(id, db)
+	if err != nil {
+		return nil, fmt.Errorf("error occured while getting task object")
+	}
+	return task, nil
+}
+
 func DeleteTaskHelper(id int, db *gorm.DB) error {
 	task, err := FindTaskByID(id, db)
 	if err != nil {
@@ -50,7 +58,7 @@ func UpdateTaskHelper(id int, requestBody *dto.CreateTask, db *gorm.DB) error {
 		return err
 	}
 	task.Title = updatedTask.Title
-	task.Status = task.Status
+	task.Status = model.Choice(task.Status)
 	if result := db.Save(&task); result.Error != nil {
 		return fmt.Errorf("could not update task tasks")
 	}

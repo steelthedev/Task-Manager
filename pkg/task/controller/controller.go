@@ -56,6 +56,22 @@ func (h *handler) DeleteTask(ctx *gin.Context) {
 
 }
 
+func (h *handler) GetSingleTask(ctx *gin.Context) {
+	id := ctx.Param("id")
+	ID, err := strconv.Atoi(id)
+	if err != nil {
+		utils.ApiErrorFunction(ctx, http.StatusInternalServerError, "Errror occured somewhere", "Error occured while converting ID to int")
+		return
+	}
+	task, err := GetSingleTaskHelper(ID, h.DB)
+	if err != nil {
+		utils.ApiErrorFunction(ctx, http.StatusInternalServerError, err.Error(), err.Error())
+		return
+	}
+	utils.ApiSuccessIndented(ctx, http.StatusOK, "", &task)
+
+}
+
 func (h *handler) UpdateTask(ctx *gin.Context) {
 	body := &dto.CreateTask{}
 	if err := ctx.BindJSON(&body); err != nil {
